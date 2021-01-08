@@ -119,6 +119,8 @@ FILE(GLOB PHPCPP_HEADERS_INCLUDE CONFIGURE_DEPENDS include/phpcpp/*.h)
 
 LINK_DIRECTORIES(${PHP_LIB_PATH})
 
+add_link_options(-undefined dynamic_lookup)
+
 IF (PHPCPP_SHARED)
   ADD_LIBRARY(phpcpp SHARED
     ${PHPCPP_COMMON_HEADERS}
