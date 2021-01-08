@@ -182,9 +182,9 @@ private:
      *  @return int         0 on success
      */
 #if PHP_VERSION_ID < 80000
-    static int processShutdown(int type, int module_number);
+    static int processRequest(int type, int module_number);
 #else
-    static zend_result processShutdown(int type, int module_number);
+    static zend_result processRequest(int type, int module_number);
 #endif
 
     /**
