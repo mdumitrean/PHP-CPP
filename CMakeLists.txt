@@ -3,10 +3,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 PROJECT(phpcpp)
 
 # Use CMake File with following options
-# PHPCPP_COMPILE_TS     Set flag if PHP was compiled with thread safe
-# PHPCPP_MSVCRT_STATIC  Set flag if you want to compile the MSVC runtime as a static library
-# PHPCPP_ARCH           Set to "x86_64" if architecture and PHP was compiled under x64 or "x86" for 32 bit
 # PHPCPP_PHP_PATH       The path to PHP sources
+OPTION(PHPCPP_32BIT "If PHP was compiled as 32 bit" OFF)
+OPTION(PHPCPP_COMPILE_TS "Set flag if PHP was compiled with thread safe" OFF)
+OPTION(PHPCPP_MSVCRT_STATIC "Set flag if you want to compile the MSVC runtime as a static library" OFF)
+OPTION(PHP8 "Compile against PHP8" ON)
+
+IF ("${PHPCPP_PHP_PATH}" STREQUAL "")
+  MESSAGE(FATAL_ERROR "PHP paths to sources need to be explicitly set. Use 'php-config --includes' to find it.")
+ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
@@ -19,6 +24,18 @@ ENDIF()
 IF (PHPCPP_COMPILE_TS)
   ADD_DEFINITIONS(-DZTS)
 ENDIF()
+
+IF (PHP8)
+  SET(PHPVER "php8")
+ELSE()
+  SET(PHPVER "php7")
+ENDIF()
+
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
+
+ADD_COMPILE_OPTIONS(-Wno-inconsistent-missing-override)
 
 ADD_DEFINITIONS(-D_MSC_STDINT_H_)
 ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
@@ -43,10 +60,10 @@ IF (MSVC)
 
   ENDIF()
 
-  IF (${PHPCPP_ARCH} STREQUAL "x86_64")
-    ADD_DEFINITIONS(-DPHP_WIN32 -DZEND_WIN32)
-  ELSE()
+  IF (PHPCPP_32BIT)
     ADD_DEFINITIONS(-DPHP_WIN32 -DZEND_WIN32 -D_USE_32BIT_TIME_T)
+  ELSE()
+    ADD_DEFINITIONS(-DPHP_WIN32 -DZEND_WIN32)
   ENDIF()
 
   SET(ADDITIONAL_COMPILER_FLAGS "/W3")
@@ -65,24 +82,24 @@ INCLUDE_DIRECTORIES(
 SET(PHP_LIBS "php")
 SET(PHP_LIB_PATH "")
 
-IF (${PHPCPP_ARCH} STREQUAL "x86_64")
+IF (NOT PHPCPP_32BIT)
   SET(PHP_LIB_PATH "x64/")
 ENDIF()
 
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
   IF (PHPCPP_COMPILE_TS)
-    SET(PHP_LIBS      ${PHP_LIBS} "php7ts_debug")
+    SET(PHP_LIBS      ${PHP_LIBS} "${PHPVER}ts_debug")
     SET(PHP_LIB_PATH  "${PHP_LIB_PATH}Debug_TS")
   ELSE()
-    SET(PHP_LIBS      ${PHP_LIBS} "php7_debug")
+    SET(PHP_LIBS      ${PHP_LIBS} "${PHPVER}_debug")
     SET(PHP_LIB_PATH  "${PHP_LIB_PATH}Debug")
   ENDIF()
 ELSE()
   IF (PHPCPP_COMPILE_TS)
-    SET(PHP_LIBS      ${PHP_LIBS} "php7ts")
+    SET(PHP_LIBS      ${PHP_LIBS} "${PHPVER}ts")
     SET(PHP_LIB_PATH  "${PHP_LIB_PATH}Release_TS")
   ELSE()
-    SET(PHP_LIBS      ${PHP_LIBS} "php7")
+    SET(PHP_LIBS      ${PHP_LIBS} "${PHPVER}")
     SET(PHP_LIB_PATH  "${PHP_LIB_PATH}Release")
   ENDIF()
 ENDIF()
