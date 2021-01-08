@@ -183,6 +183,9 @@ protected:
         info->allow_null = arg.allowNull();
 #endif
 
+#undef _ZEND_TYPE_NULLABLE_BIT
+#define _ZEND_TYPE_NULLABLE_BIT 0x2u
+
         // set the correct type-hint
         switch (arg.type())
         {
@@ -209,12 +212,12 @@ protected:
             case Type::Numeric:     info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, (int)arg.allowNull(), 0);      break;  // accept integers here
             case Type::Float:       info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_DOUBLE, (int)arg.allowNull(), 0);    break;  // floating-point values welcome too
             case Type::String:      info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_STRING, (int)arg.allowNull(), 0);    break;  // accept strings, should auto-cast objects with __toString as well
-            case Type::Array:       info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_ARRAY, arg.allowNull(), 0);     break;  // array of anything (individual members cannot be restricted)
+            case Type::Array:       info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_ARRAY, (int)arg.allowNull(), 0);     break;  // array of anything (individual members cannot be restricted)
             case Type::Object:                                                            // if there is a classname and the argument is not nullable, it's simply the classname
-                if (!arg.classname()) info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_OBJECT, arg.allowNull(), 0);
+                if (!arg.classname()) info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_OBJECT, (int)arg.allowNull(), 0);
             //    else info->type = (zend_type)arg.encoded();
                 break;
-            case Type::Callable:    info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_CALLABLE, arg.allowNull(), 0);  break;  // anything that can be invoke
+            case Type::Callable:    info->type = (zend_type) ZEND_TYPE_INIT_CODE(IS_CALLABLE, (int)arg.allowNull(), 0);  break;  // anything that can be invoke
 
            default:                info->type = ZEND_TYPE_INIT_CODE(IS_UNDEF, 0, 0);     break;  // if not specified we allow anything
 #else
