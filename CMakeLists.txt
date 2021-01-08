@@ -14,7 +14,8 @@ IF ("${PHPCPP_PHP_PATH}" STREQUAL "")
 ENDIF()
 
 IF (NOT EXISTS "${PHPCPP_PHP_PATH}/main/php.h")
-  message(SEND_ERROR "The PHPCPP_PHP_PATH variable does not lead to main/php.h")
+  MESSAGE(SEND_ERROR "The PHPCPP_PHP_PATH variable does not lead to main/php.h")
+  MESSAGE("Tried: ${PHPCPP_PHP_PATH}")
 ENDIF()
 
 #SET(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib${CMAKE_LIBRARY_ARCHITECTURE}")
@@ -119,7 +120,9 @@ FILE(GLOB PHPCPP_HEADERS_INCLUDE CONFIGURE_DEPENDS include/phpcpp/*.h)
 
 LINK_DIRECTORIES(${PHP_LIB_PATH})
 
-add_link_options(-undefined dynamic_lookup)
+IF(APPLE)
+    add_link_options(-undefined dynamic_lookup)
+ENDIF()
 
 IF (PHPCPP_SHARED)
   ADD_LIBRARY(phpcpp SHARED
