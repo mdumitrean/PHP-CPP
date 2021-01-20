@@ -6,3 +6,5 @@
 *.so.*
 shared/
 static/
+mac-build/
+linux-build/
